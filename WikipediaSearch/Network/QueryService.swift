@@ -23,7 +23,8 @@ class QueryService {
     if Network.reachability?.isConnectedToNetwork == true {
         //Do what you need, for example send JSON request on server
     if var urlComponents = URLComponents(string: "https://en.wikipedia.org//w/api.php") {
-      urlComponents.query = "action=query&format=json&prop=pageimages|pageterms&generator=prefixsearch&redirects=1&formatversion=2&piprop=thumbnail&pithumbsize=50&pilimit=10&wbptterms=description&gpssearch=+\(searchTerm)&gpslimit=10"
+        let newString = searchTerm.replacingOccurrences(of: " ", with: "+")
+      urlComponents.query = "action=query&format=json&prop=pageimages|pageterms&generator=prefixsearch&redirects=1&formatversion=2&piprop=thumbnail&pithumbsize=50&pilimit=10&wbptterms=description&gpssearch=+\(newString)&gpslimit=10"
       guard let url = urlComponents.url else { return }
       dataTask = defaultSession.dataTask(with: url) { data, response, error in
         defer { self.dataTask = nil }

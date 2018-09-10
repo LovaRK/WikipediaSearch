@@ -43,6 +43,13 @@ class WikipediaTableSearchController: UIViewController , UITableViewDataSource, 
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem:.bookmarks , target: self, action: #selector(addTapped))
+    }
+    
+    @objc func addTapped(sender: AnyObject) {
+        self.loadingFromLocal()
+         self.wikiTableView.reloadData()
     }
     @objc func statusManager(_ notification: NSNotification) {
         let Alert = alert()
@@ -74,20 +81,25 @@ class WikipediaTableSearchController: UIViewController , UITableViewDataSource, 
             self.wikiTableView.addSubview(self.refreshControl)
         }else{
             //Load from local
-            self.title = "Recent Search Results"
-
-            let moc = coreDataStack.persistentContainer.viewContext
-            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Artical")
-            request.returnsObjectsAsFaults = false
-            do {
-                let result = try moc.fetch(request)
-                currentArticleArray = []
-                for data in result as! [NSManagedObject] {
-                    currentArticleArray.append(Article.init(name: data.value(forKey: "name") as! String, image:data.value(forKey: "image") as! String, description: data.value(forKey: "descriptionText") as! String, articalContent: data.value(forKey: "articalContent") as! String))
-                }
-            } catch {
-                print("Failed")
+             self.loadingFromLocal()
+        }
+    }
+    
+    func loadingFromLocal(){
+        self.title = "Recent Search Results"
+        
+        let moc = coreDataStack.persistentContainer.viewContext
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Artical")
+        request.returnsObjectsAsFaults = false
+        do {
+            let result = try moc.fetch(request)
+            currentArticleArray = []
+            for data in result as! [NSManagedObject] {
+                currentArticleArray.append(Article.init(name: data.value(forKey: "name") as! String, image:data.value(forKey: "image") as! String, description: data.value(forKey: "descriptionText") as! String, articalContent: data.value(forKey: "articalContent") as! String))
+                
             }
+        } catch {
+            print("Failed")
         }
     }
     
@@ -125,9 +137,6 @@ class WikipediaTableSearchController: UIViewController , UITableViewDataSource, 
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //       // guard let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") as? CustomCellTableViewCell else {
-        //            return
-        //        }
         let artical = currentArticleArray[indexPath.row]
         let detailVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "DetailViewController") as! DetailViewController
         // detailVC.imageToSave = cell.imgView.image
@@ -138,7 +147,7 @@ class WikipediaTableSearchController: UIViewController , UITableViewDataSource, 
     // Search Bar
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(self.reload(_:)), object: searchBar)
-        perform(#selector(self.reload(_:)), with: searchBar, afterDelay: 0.50)
+        perform(#selector(self.reload(_:)), with: searchBar, afterDelay: 0.10)
     }
     
     @objc func reload(_ searchBar: UISearchBar) {
@@ -162,18 +171,6 @@ class WikipediaTableSearchController: UIViewController , UITableViewDataSource, 
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-//        searchBar.resignFirstResponder()
-//        if Network.reachability?.isConnectedToNetwork == true {
-//            //Do what you need, for example send JSON request on server
-//            self.title = "Wikipedia Search"
-//            self.seatchForArticals(searchBar.text!)
-//            self.wikiTableView.reloadData()
-//        }else{
-//            let Alert = alert()
-//            Alert.msg(message: "Please getting recent search results", title: "No Internet!")
-//            setUpArticles()
-//            self.wikiTableView.reloadData()
-//        }
         
     }
     
